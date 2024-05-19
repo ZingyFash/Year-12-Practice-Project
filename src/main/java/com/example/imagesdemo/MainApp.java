@@ -64,7 +64,6 @@ public class MainApp extends Application {
             writer.close();
         } catch (IOException e) {
             System.out.println("Failed to write times to file.");
-            e.printStackTrace();
         }
     }
 
@@ -218,13 +217,14 @@ public class MainApp extends Application {
 
     /**
      * For now handles the identification of the user then runs the JavaFX application.
-     * @param args
+     * @param args - command line arguments or something I don't know it just complained
+     *            that there was nothing here.
      */
     public static void main(String[] args) {
         System.out.println("Enter your name:");
         name = new Scanner(System.in).next();
 
-        BufferedReader reader = null;
+        BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader("Times.txt"));
             String line = reader.readLine();
@@ -235,7 +235,6 @@ public class MainApp extends Application {
             reader.close();
         } catch(IOException e) {
             System.out.println("Failed to read the times.");
-            e.printStackTrace();
         }
 
         if (!times.containsKey(name)) {
