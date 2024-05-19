@@ -2,7 +2,6 @@ package com.example.imagesdemo;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -11,7 +10,6 @@ import javafx.scene.control.Label;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
@@ -30,16 +28,26 @@ public class MainApp extends Application {
     private static Label timerLabel;
     static Timer timer;
 
+    // Stores the velocities of the balls at the start of the update
+    // so that calculations are not affected by the order that they are done in
     static HashMap<Ball, Vector2> ballVelHash = new HashMap<>();
     private static boolean running = true;
 
+    /**
+     * Handles the logic for ending the game. This includes updating the player's
+     * recorded times, writing the data back to the file *to be changed when a database is used*
+     * and displaying the end screen
+     */
     public static void endGame() {
         times.put(name, new double[]{Double.max(times.get(name)[0], timerCounter), Double.min(times.get(name)[1], timerCounter)});
         writeTimesToFile();
 
-        displayTime();
+        displayEndScreen();
     }
 
+    /**
+     * Writes the times data back to the times file to update any changes that occurred
+     */
     private static void writeTimesToFile() {
         BufferedWriter writer;
         try {
@@ -60,7 +68,10 @@ public class MainApp extends Application {
         }
     }
 
-    private static void displayTime() {
+    /**
+     * Shows the player's time and provided the user with buttons to exit the application or restart it
+     */
+    private static void displayEndScreen() {
         running = false;
         timerLabel.setTranslateX(450);
         timerLabel.setTranslateY(750/2.0 - 50);
@@ -94,6 +105,17 @@ public class MainApp extends Application {
         });
     }
 
+    /**
+     * A helper function which generates and returns a button to make other functions
+     * more readable. NOTE : the functionality of the button still needs to be
+     * implemented in the calling function.
+     * @param text - The text to be displayed on the button
+     * @param textColour - The colour of the text on the button
+     * @param backgroundColour - The colour of the background of the button
+     * @param posX - The displacement in the x-axis of the button in the scene
+     * @param posY - The displacement in the y-axis of the button in the scene
+     * @return The newly generated button
+     */
     private static Button genButton(String text, Paint textColour, Paint backgroundColour, double posX, double posY) {
         Button button = new Button(text);
         button.setTextFill(textColour);
@@ -105,7 +127,13 @@ public class MainApp extends Application {
         return button;
     }
 
-    private static void initialiseApplication(Scene scene, Stage stage) {
+    /**
+     * Sets up the scene, balls, and event handlers for the scene. Also provided the user a button to run the game
+     * @param stage - the stage to set the scene in.
+     */
+    private static void initialiseApplication(Stage stage) {
+        Scene scene = new Scene(ROOT, SCENE_WIDTH,SCENE_HEIGHT);
+        scene.setFill(Paint.valueOf("#00000"));
 
         for (int i = 0; i < 7; i++) {
             BALLS.add(new Ball());
@@ -134,6 +162,10 @@ public class MainApp extends Application {
 
     }
 
+    /**
+     * Handles the logic for starting the game. Initialises a timer and a label to keep track of the time
+     * elapsed.
+     */
     private static void run() {
         timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -154,10 +186,8 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage stage) {
-        Scene groupScene = new Scene(ROOT, SCENE_WIDTH,SCENE_HEIGHT);
-        groupScene.setFill(Paint.valueOf("#000000"));
 
-        initialiseApplication(groupScene, stage);
+        initialiseApplication(stage);
 
     }
 
@@ -169,6 +199,10 @@ public class MainApp extends Application {
         player.updateKeyCodeHashMap(keyEvent.getCode(), false);
     }
 
+    /**
+     * Called once every update, updates the velocities hash map and calls the balls update functions.
+     * Then increases the timer counter and formats it for the label to avoid floating point imprecision.
+     */
     public static void update() {
         if (!running) return;
         player.update();
@@ -182,6 +216,10 @@ public class MainApp extends Application {
     private static String name;
     private static final HashMap<String, double[]> times = new HashMap<>();
 
+    /**
+     * For now handles the identification of the user then runs the JavaFX application.
+     * @param args
+     */
     public static void main(String[] args) {
         System.out.println("Enter your name:");
         name = new Scanner(System.in).next();
