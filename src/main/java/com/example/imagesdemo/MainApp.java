@@ -132,7 +132,7 @@ public class MainApp extends Application {
      */
     private static void initialiseApplication(Stage stage) {
         Scene scene = new Scene(ROOT, SCENE_WIDTH,SCENE_HEIGHT);
-        scene.setFill(Paint.valueOf("#00000"));
+        scene.setFill(Paint.valueOf("#000000"));
 
         for (int i = 0; i < 7; i++) {
             BALLS.add(new Ball());
