@@ -29,6 +29,10 @@ public class Player extends Ball {
         keyCodeHashMap.put(KeyCode.A, false);
         keyCodeHashMap.put(KeyCode.S, false);
         keyCodeHashMap.put(KeyCode.D, false);
+        keyCodeHashMap.put(KeyCode.UP, false);
+        keyCodeHashMap.put(KeyCode.DOWN, false);
+        keyCodeHashMap.put(KeyCode.LEFT, false);
+        keyCodeHashMap.put(KeyCode.RIGHT, false);
     }
 
     /**
@@ -67,12 +71,12 @@ public class Player extends Ball {
      * Handles the inputs stored in the keyCodeHashMap and updating the velocity accordingly
      */
     private void checkInputs () {
-        if (keyCodeHashMap.get(KeyCode.W)) vel.y = -3;
-        if (keyCodeHashMap.get(KeyCode.A)) vel.x = -3;
-        if (keyCodeHashMap.get(KeyCode.S)) vel.y = 3;
-        if (keyCodeHashMap.get(KeyCode.D)) vel.x = 3;
-        if (!keyCodeHashMap.get(KeyCode.W) && !keyCodeHashMap.get(KeyCode.S)) vel.y = 0;
-        if (!keyCodeHashMap.get(KeyCode.A) && !keyCodeHashMap.get(KeyCode.D)) vel.x = 0;
+        if (keyCodeHashMap.get(KeyCode.W) || keyCodeHashMap.get(KeyCode.UP)) vel.y = -3;
+        if (keyCodeHashMap.get(KeyCode.A) || keyCodeHashMap.get(KeyCode.LEFT)) vel.x = -3;
+        if (keyCodeHashMap.get(KeyCode.S) || keyCodeHashMap.get(KeyCode.DOWN)) vel.y = 3;
+        if (keyCodeHashMap.get(KeyCode.D) || keyCodeHashMap.get(KeyCode.RIGHT)) vel.x = 3;
+        if (!(keyCodeHashMap.get(KeyCode.W) || keyCodeHashMap.get(KeyCode.UP)) && !(keyCodeHashMap.get(KeyCode.S) || keyCodeHashMap.get(KeyCode.DOWN))) vel.y = 0;
+        if (!(keyCodeHashMap.get(KeyCode.A) || keyCodeHashMap.get(KeyCode.LEFT)) && !(keyCodeHashMap.get(KeyCode.D)|| keyCodeHashMap.get(KeyCode.RIGHT))) vel.x = 0;
     }
 }
 
