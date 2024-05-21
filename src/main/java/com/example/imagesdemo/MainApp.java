@@ -31,7 +31,7 @@ public class MainApp extends Application {
     // Stores the velocities of the balls at the start of the update
     // so that calculations are not affected by the order that they are done in
     static HashMap<Ball, Vector2> ballVelHash = new HashMap<>();
-    private static boolean running = true;
+    private static boolean isRunning = true;
 
     /**
      * Handles the logic for ending the game. This includes updating the player's
@@ -55,7 +55,10 @@ public class MainApp extends Application {
             String[] lines = new String[times.size()];
             final int[] i = {0};
             times.forEach((s, d) -> {
-                lines[i[0]] = s+","+Double.max(d[0], timerCounter)+","+Double.min(d[1], timerCounter);
+                lines[i[0]] = s;
+                for (double v : d) {
+                    lines[i[0]] += ","+v;
+                }
                 i[0]++;
             });
             for (String line : lines) {
@@ -71,7 +74,7 @@ public class MainApp extends Application {
      * Shows the player's time and provided the user with buttons to exit the application or restart it
      */
     private static void displayEndScreen() {
-        running = false;
+        isRunning = false;
         timerLabel.setTranslateX(450);
         timerLabel.setTranslateY(750/2.0 - 50);
 
@@ -93,7 +96,7 @@ public class MainApp extends Application {
             BALLS.add(player);
 
 
-            running = true;
+            isRunning = true;
 
             timerLabel = new Label();
             timerLabel.setBackground(Background.fill(Paint.valueOf("#ffffff")));
@@ -143,8 +146,13 @@ public class MainApp extends Application {
 
 
         Button runButton = genButton("Run Game", Paint.valueOf("#00ff00"), Paint.valueOf("#ff00ff"), 400, 300);
+        Button comingSoonButton = genButton("Coming Soon...", Paint.valueOf("#000000"), Paint.valueOf("#ffffff"), 400, 500);
         runButton.setOnAction(e -> {
-            ROOT.getChildren().remove(runButton);
+            ROOT.getChildren().removeAll(runButton, comingSoonButton);
+            run();
+        });
+        comingSoonButton.setOnAction(e -> {
+            ROOT.getChildren().removeAll(runButton, comingSoonButton);
             run();
         });
 
@@ -203,11 +211,12 @@ public class MainApp extends Application {
      * Then increases the timer counter and formats it for the label to avoid floating point imprecision.
      */
     public static void update() {
-        if (!running) return;
+        if (!isRunning) return;
         player.update();
         BALLS.forEach(b -> ballVelHash.put(b, b.getVel()));
         BALLS.forEach(Ball::update);
         timerCounter += .01;
+
         timerCounter = Math.round(timerCounter * 100) / 100.0;
         if (timerCounter % 10 != timerCounter) {
             timerLabel.setMinWidth(125);
@@ -225,7 +234,7 @@ public class MainApp extends Application {
      */
     public static void main(String[] args) {
         System.out.println("Enter your name:");
-        name = new Scanner(System.in).next();
+        name = new Scanner(System.in).nextLine();
 
         BufferedReader reader;
         try {

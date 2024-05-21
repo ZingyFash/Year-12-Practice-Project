@@ -1,4 +1,5 @@
 henry,41.0,0.24
-big,36.42,0.98
-bigwilly,36.42,0.74
+big,26.6,0.98
+bigwilly,18.5,0.74
 Jason,29.13,0.3
+There is a Space,11.58,11.58
