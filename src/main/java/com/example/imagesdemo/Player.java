@@ -55,7 +55,6 @@ public class Player extends Ball {
 
     /**
      * Clamps the player's position to the bounds of the screen
-     * i.e. below the middle line.
      */
     void resolveBorderCollisions () {
         pos.x = Math.max(gfx.getRadius(), pos.x);
