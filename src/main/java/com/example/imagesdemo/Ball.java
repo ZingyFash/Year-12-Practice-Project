@@ -17,17 +17,17 @@ public class Ball {
     }
     Ball() {
         Random random = new Random();
-        int r = random.nextInt(31)+1 << 3;
-        int g = random.nextInt(31)+1 << 3;
-        int b = random.nextInt(31)+1 << 3;
+        int r = random.nextInt(15)+1 << 4;
+        int g = random.nextInt(15)+1 << 4;
+        int b = random.nextInt(15)+1 << 4;
 
         r = r << 16;
         g = g << 8;
 
-        String colourString = Integer.toHexString(r + g + b);
+        StringBuilder colourString = new StringBuilder(Integer.toHexString(r + g + b));
         int length = colourString.length();
         for (int i = 0; i < 6 - length; i++) {
-            colourString = "0" + colourString;
+            colourString.insert(0, "0");
         }
         gfx = new Circle(0, 0, 20, Paint.valueOf("#"+ colourString));
         MainApp.ROOT.getChildren().add(gfx);
@@ -45,7 +45,9 @@ public class Ball {
         gfx.setCenterX(pos.x);
         gfx.setCenterY(pos.y);
     }
-    Ball(String s) {}
+    Ball(String s) {
+        System.out.print(s);
+    }
 
     public void update() {
         resolveBorderCollisions();

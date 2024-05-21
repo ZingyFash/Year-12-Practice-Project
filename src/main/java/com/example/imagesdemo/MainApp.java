@@ -209,6 +209,9 @@ public class MainApp extends Application {
         BALLS.forEach(Ball::update);
         timerCounter += .01;
         timerCounter = Math.round(timerCounter * 100) / 100.0;
+        if (timerCounter % 10 != timerCounter) {
+            timerLabel.setMinWidth(125);
+        }
         timerLabel.setText(Double.toString(timerCounter));
     }
 
@@ -244,4 +247,3 @@ public class MainApp extends Application {
         launch();
     }
 }
-
