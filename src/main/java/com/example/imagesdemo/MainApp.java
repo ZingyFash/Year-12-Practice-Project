@@ -7,6 +7,7 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.paint.Paint;
@@ -143,17 +144,21 @@ public class MainApp extends Application {
 
         BALLS.add(player);
 
+        TextField tf = new TextField();
+        tf.setTranslateX(400);
+        tf.setTranslateY(150);
 
+        ROOT.getChildren().add(tf);
 
         Button runButton = genButton("Run Game", Paint.valueOf("#00ff00"), Paint.valueOf("#ff00ff"), 400, 300);
         Button comingSoonButton = genButton("Coming Soon...", Paint.valueOf("#000000"), Paint.valueOf("#ffffff"), 400, 500);
         runButton.setOnAction(e -> {
-            ROOT.getChildren().removeAll(runButton, comingSoonButton);
-            run();
+            ROOT.getChildren().removeAll(tf, runButton, comingSoonButton);
+            run(tf.getText());
         });
         comingSoonButton.setOnAction(e -> {
-            ROOT.getChildren().removeAll(runButton, comingSoonButton);
-            run();
+            ROOT.getChildren().removeAll(tf, runButton, comingSoonButton);
+            run(tf.getText());
         });
 
         EventHandler<KeyEvent> keyPressedEventHandler = MainApp::move;
@@ -173,7 +178,26 @@ public class MainApp extends Application {
      * Handles the logic for starting the game. Initialises a timer and a label to keep track of the time
      * elapsed.
      */
-    private static void run() {
+    private static void run(String name) {
+        MainApp.name = name;
+
+        BufferedReader reader;
+        try {
+            reader = new BufferedReader(new FileReader("Times.txt"));
+            String line = reader.readLine();
+            while (line != null) {
+                times.put(line.split(",")[0], new double[]{Double.parseDouble(line.split(",")[1]), Double.parseDouble(line.split(",")[2])});
+                line = reader.readLine();
+            }
+            reader.close();
+        } catch(IOException e) {
+            System.out.println("Failed to read the times.");
+        }
+
+        if (!times.containsKey(name)) {
+            times.put(name, new double[]{Double.MIN_VALUE, Double.MAX_VALUE});
+        }
+
         timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
@@ -233,26 +257,6 @@ public class MainApp extends Application {
      *            that there was nothing here.
      */
     public static void main(String[] args) {
-        System.out.println("Enter your name:");
-        name = new Scanner(System.in).nextLine();
-
-        BufferedReader reader;
-        try {
-            reader = new BufferedReader(new FileReader("Times.txt"));
-            String line = reader.readLine();
-            while (line != null) {
-                times.put(line.split(",")[0], new double[]{Double.parseDouble(line.split(",")[1]), Double.parseDouble(line.split(",")[2])});
-                line = reader.readLine();
-            }
-            reader.close();
-        } catch(IOException e) {
-            System.out.println("Failed to read the times.");
-        }
-
-        if (!times.containsKey(name)) {
-            times.put(name, new double[]{Double.MIN_VALUE, Double.MAX_VALUE});
-        }
-
         launch();
     }
 }
