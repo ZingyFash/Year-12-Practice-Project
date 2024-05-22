@@ -26,6 +26,7 @@ public class MainApp extends Application {
     public static final int SCENE_HEIGHT = 750;
 
     private static double timerCounter = 0;
+    private static double scoreCounter = 0;
     private static Label timerLabel;
     static Timer timer;
 
@@ -33,6 +34,8 @@ public class MainApp extends Application {
     // so that calculations are not affected by the order that they are done in
     static HashMap<Ball, Vector2> ballVelHash = new HashMap<>();
     private static boolean isRunning = true;
+    private static boolean isTimeAttack = true;
+    private static final double kineticEnergyMultiplier = 0.00025;
 
     /**
      * Handles the logic for ending the game. This includes updating the player's
@@ -40,7 +43,17 @@ public class MainApp extends Application {
      * and displaying the end screen
      */
     public static void endGame() {
-        times.put(name, new double[]{Double.max(times.get(name)[0], timerCounter), Double.min(times.get(name)[1], timerCounter)});
+        if (isTimeAttack) {
+            times.put(name, new double[]{Double.max(times.get(name)[0], timerCounter),
+                    Double.min(times.get(name)[1], timerCounter),
+                    times.get(name)[2]
+            });
+        } else {
+            times.put(name, new double[]{times.get(name)[0],
+                    times.get(name)[1],
+                    Double.max(times.get(name)[2], scoreCounter)
+            });
+        }
         writeTimesToFile();
 
         displayEndScreen();
@@ -150,14 +163,17 @@ public class MainApp extends Application {
 
         ROOT.getChildren().add(tf);
 
-        Button runButton = genButton("Run Game", Paint.valueOf("#00ff00"), Paint.valueOf("#ff00ff"), 400, 300);
-        Button comingSoonButton = genButton("Coming Soon...", Paint.valueOf("#000000"), Paint.valueOf("#ffffff"), 400, 500);
-        runButton.setOnAction(e -> {
-            ROOT.getChildren().removeAll(tf, runButton, comingSoonButton);
+        Button timeAttackButton = genButton("Run Time Attack", Paint.valueOf("#00ff00"),
+                Paint.valueOf("#ff00ff"), 350, 300);
+        Button scoreAttackButton = genButton("Run Score Attack", Paint.valueOf("#ffffff"),
+                Paint.valueOf("#555555"), 350, 500);
+        timeAttackButton.setOnAction(e -> {
+            ROOT.getChildren().removeAll(tf, timeAttackButton, scoreAttackButton);
             run(tf.getText());
         });
-        comingSoonButton.setOnAction(e -> {
-            ROOT.getChildren().removeAll(tf, runButton, comingSoonButton);
+        scoreAttackButton.setOnAction(e -> {
+            isTimeAttack = false;
+            ROOT.getChildren().removeAll(tf, timeAttackButton, scoreAttackButton);
             run(tf.getText());
         });
 
@@ -186,7 +202,10 @@ public class MainApp extends Application {
             reader = new BufferedReader(new FileReader("Times.txt"));
             String line = reader.readLine();
             while (line != null) {
-                times.put(line.split(",")[0], new double[]{Double.parseDouble(line.split(",")[1]), Double.parseDouble(line.split(",")[2])});
+                times.put(line.split(",")[0],
+                        new double[]{Double.parseDouble(line.split(",")[1]),
+                                Double.parseDouble(line.split(",")[2]),
+                                Double.parseDouble(line.split(",")[3])});
                 line = reader.readLine();
             }
             reader.close();
@@ -195,7 +214,7 @@ public class MainApp extends Application {
         }
 
         if (!times.containsKey(name)) {
-            times.put(name, new double[]{Double.MIN_VALUE, Double.MAX_VALUE});
+            times.put(name, new double[]{0, 1000, 0});
         }
 
         timer = new Timer();
@@ -211,6 +230,7 @@ public class MainApp extends Application {
         timerLabel.setTextFill(Paint.valueOf("#ff0000"));
         timerLabel.setFont(Font.font(50));
         timerLabel.setMinWidth(100);
+        if (!isTimeAttack) timerLabel.setMinWidth(125);
         ROOT.getChildren().add(timerLabel);
 
     }
@@ -239,13 +259,27 @@ public class MainApp extends Application {
         player.update();
         BALLS.forEach(b -> ballVelHash.put(b, b.getVel()));
         BALLS.forEach(Ball::update);
-        timerCounter += .01;
-
-        timerCounter = Math.round(timerCounter * 100) / 100.0;
-        if (timerCounter % 10 != timerCounter) {
-            timerLabel.setMinWidth(125);
+        if (isTimeAttack) {
+            timerCounter += .01;
+            timerCounter = Math.round(timerCounter * 100) / 100.0;
+            if (timerCounter % 10 != timerCounter) {
+                timerLabel.setMinWidth(125);
+            }
+            timerLabel.setText(Double.toString(timerCounter));
+        } else {
+            scoreCounter += calculateKE() * kineticEnergyMultiplier;
+            scoreCounter = Math.round(scoreCounter * 1000) / 1000.0;
+            if (scoreCounter % 10 != scoreCounter) {
+                timerLabel.setMinWidth(150);
+            }
+            timerLabel.setText(Double.toString(scoreCounter));
         }
-        timerLabel.setText(Double.toString(timerCounter));
+    }
+
+    private static double calculateKE() {
+        double[] total = {0};
+        BALLS.forEach(ball -> total[0] += ball.vel.getMagnitude() * ball.vel.getMagnitude());
+        return total[0];
     }
 
     private static String name;

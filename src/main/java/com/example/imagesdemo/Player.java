@@ -9,6 +9,7 @@ import java.util.HashMap;
 public class Player extends Ball {
 
     private final HashMap<KeyCode, Boolean> keyCodeHashMap;
+    private final Circle core;
 
     public static void main(String[] args) {
         MainApp.main(args);
@@ -22,8 +23,9 @@ public class Player extends Ball {
         super("");
         this.pos = Vector2.vec2(500, 500);
         this.vel = Vector2.vec2(0, 0);
-        this.gfx = new Circle(this.pos.x, this.pos.y, 25, Paint.valueOf("#f00000"));
-        MainApp.ROOT.getChildren().add(this.gfx);
+        this.gfx = new Circle(this.pos.x, this.pos.y, 25, Paint.valueOf("#ff0000"));
+        this.core = new Circle(this.pos.x, this.pos.y, 15, Paint.valueOf("#ffffff"));
+        MainApp.ROOT.getChildren().addAll(this.gfx, this.core);
         keyCodeHashMap = new HashMap<>();
         keyCodeHashMap.put(KeyCode.W, false);
         keyCodeHashMap.put(KeyCode.A, false);
@@ -55,6 +57,8 @@ public class Player extends Ball {
         resolveBorderCollisions();
         gfx.setCenterX(pos.x);
         gfx.setCenterY(pos.y);
+        core.setCenterX(pos.x);
+        core.setCenterY(pos.y);
     }
 
     /**

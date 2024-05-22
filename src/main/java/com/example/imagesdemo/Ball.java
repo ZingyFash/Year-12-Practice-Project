@@ -17,9 +17,9 @@ public class Ball {
     }
     Ball() {
         Random random = new Random();
-        int r = random.nextInt(15)+1 << 4;
-        int g = random.nextInt(15)+1 << 4;
-        int b = random.nextInt(15)+1 << 4;
+        int r = random.nextInt(7)+1 << 5;
+        int g = random.nextInt(7)+1 << 5;
+        int b = random.nextInt(7)+1 << 5;
 
         r = r << 16;
         g = g << 8;
