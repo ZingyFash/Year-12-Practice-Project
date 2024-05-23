@@ -35,7 +35,7 @@ public class MainApp extends Application {
     static HashMap<Ball, Vector2> ballVelHash = new HashMap<>();
     private static boolean isRunning = true;
     private static boolean isTimeAttack = true;
-    private static final double kineticEnergyMultiplier = 0.00025;
+    private static final double scoreAttackMultiplier = 0.00025;
 
     /**
      * Handles the logic for ending the game. This includes updating the player's
@@ -101,6 +101,7 @@ public class MainApp extends Application {
             BALLS.clear();
 
             timerCounter = 0;
+            scoreCounter = 0;
 
             for (int i = 0; i < 7; i++) {
                 BALLS.add(new Ball());
@@ -267,7 +268,7 @@ public class MainApp extends Application {
             }
             timerLabel.setText(Double.toString(timerCounter));
         } else {
-            scoreCounter += calculateKE() * kineticEnergyMultiplier;
+            scoreCounter += calculateScore() * scoreAttackMultiplier;
             scoreCounter = Math.round(scoreCounter * 1000) / 1000.0;
             if (scoreCounter % 10 != scoreCounter) {
                 timerLabel.setMinWidth(150);
@@ -276,9 +277,9 @@ public class MainApp extends Application {
         }
     }
 
-    private static double calculateKE() {
+    private static double calculateScore() {
         double[] total = {0};
-        BALLS.forEach(ball -> total[0] += ball.vel.getMagnitude() * ball.vel.getMagnitude());
+        BALLS.forEach(ball -> total[0] += (ball.vel.getMagnitude() * ball.vel.getMagnitude()) / Math.log1p(ball.vel.getMagnitude() + 1));
         return total[0];
     }
 
