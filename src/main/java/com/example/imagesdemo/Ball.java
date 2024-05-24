@@ -36,9 +36,9 @@ public class Ball {
         int wall = random.nextInt(4);
         double percent = random.nextDouble();
         double x = ((wall & 1) == 0)? percent*MainApp.SCENE_WIDTH :
-                (((wall >> 1) & 1) == 0)? gfx.getRadius()+5 : MainApp.SCENE_WIDTH - gfx.getRadius()+5;
+                ((wall & 2) == 0)? gfx.getRadius()+5 : MainApp.SCENE_WIDTH - gfx.getRadius()+5;
         double y = ((wall & 1) == 1)? percent*MainApp.SCENE_HEIGHT :
-                (((wall >> 1) & 1) == 0)? gfx.getRadius()+5 : MainApp.SCENE_HEIGHT - gfx.getRadius()+5;
+                ((wall & 2) == 0)? gfx.getRadius()+5 : MainApp.SCENE_HEIGHT - gfx.getRadius()+5;
         pos = Vector2.vec2(x, y);
         vel = Vector2.vec2(3*(random.nextDouble()-.5), 3*(random.nextDouble()-.5));
 

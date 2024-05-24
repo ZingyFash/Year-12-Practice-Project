@@ -20,7 +20,9 @@ import java.util.*;
 public class MainApp extends Application {
 
     public static final Group ROOT = new Group();
-    private static Player player = new Player();
+    private static Stage STAGE;
+    private static Scene scene;
+    private static Player player;
     public static final ArrayList<Ball> BALLS = new ArrayList<>();
     public static final int SCENE_WIDTH = 1000;
     public static final int SCENE_HEIGHT = 750;
@@ -120,6 +122,13 @@ public class MainApp extends Application {
             timerLabel.setMinWidth(100);
             ROOT.getChildren().add(timerLabel);
         });
+
+        Button modeSelectButton = genButton("Choose Game Mode", Paint.valueOf("00ff00"), Paint.valueOf("#0000ff"), 400, 650);
+        modeSelectButton.setOnAction(e -> {
+            ROOT.getChildren().clear();
+            BALLS.clear();
+            initialiseApplication();
+        });
     }
 
     /**
@@ -146,15 +155,15 @@ public class MainApp extends Application {
 
     /**
      * Sets up the scene, balls, and event handlers for the scene. Also provided the user a button to run the game
-     * @param stage - the stage to set the scene in.
      */
-    private static void initialiseApplication(Stage stage) {
-        Scene scene = new Scene(ROOT, SCENE_WIDTH,SCENE_HEIGHT);
+    private static void initialiseApplication() {
         scene.setFill(Paint.valueOf("#000000"));
-
+        timerCounter = 0;
+        scoreCounter = 0;
         for (int i = 0; i < 7; i++) {
             BALLS.add(new Ball());
         }
+        player = new Player();
 
         BALLS.add(player);
 
@@ -169,6 +178,7 @@ public class MainApp extends Application {
         Button scoreAttackButton = genButton("Run Score Attack", Paint.valueOf("#ffffff"),
                 Paint.valueOf("#555555"), 350, 500);
         timeAttackButton.setOnAction(e -> {
+            isTimeAttack = true;
             ROOT.getChildren().removeAll(tf, timeAttackButton, scoreAttackButton);
             run(tf.getText());
         });
@@ -183,11 +193,11 @@ public class MainApp extends Application {
         scene.addEventHandler(KeyEvent.KEY_PRESSED, keyPressedEventHandler);
         scene.addEventHandler(KeyEvent.KEY_RELEASED, keyReleasedEventHandler);
 
-        stage.setOnCloseRequest(event -> System.exit(0));
+        STAGE.setOnCloseRequest(event -> System.exit(0));
 
-        stage.setTitle("Practice Project");
-        stage.setScene(scene);
-        stage.show();
+        STAGE.setTitle("Practice Project");
+        STAGE.setScene(scene);
+        STAGE.show();
 
     }
 
@@ -218,28 +228,34 @@ public class MainApp extends Application {
             times.put(name, new double[]{0, 1000, 0});
         }
 
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(MainApp::update);
-            }
-        }, 0, 10);
-
-        timerLabel = new Label();
-        timerLabel.setBackground(Background.fill(Paint.valueOf("#ffffff")));
-        timerLabel.setTextFill(Paint.valueOf("#ff0000"));
-        timerLabel.setFont(Font.font(50));
+        if (timer == null) {
+            timer = new Timer();
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    Platform.runLater(MainApp::update);
+                }
+            }, 0, 10);
+        }
+        if (timerLabel == null) {
+            timerLabel = new Label();
+            timerLabel.setBackground(Background.fill(Paint.valueOf("#ffffff")));
+            timerLabel.setTextFill(Paint.valueOf("#ff0000"));
+            timerLabel.setFont(Font.font(50));
+        }
+        timerLabel.setTranslateX(0);
+        timerLabel.setTranslateY(0);
         timerLabel.setMinWidth(100);
         if (!isTimeAttack) timerLabel.setMinWidth(125);
         ROOT.getChildren().add(timerLabel);
-
+        isRunning = true;
     }
 
     @Override
     public void start(Stage stage) {
-
-        initialiseApplication(stage);
+        STAGE = stage;
+        scene = new Scene(ROOT, SCENE_WIDTH,SCENE_HEIGHT);
+        initialiseApplication();
 
     }
 
