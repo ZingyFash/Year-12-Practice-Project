@@ -48,12 +48,13 @@ public class MainApp extends Application {
         if (isTimeAttack) {
             times.put(name, new double[]{Double.max(times.get(name)[0], timerCounter),
                     Double.min(times.get(name)[1], timerCounter),
-                    times.get(name)[2]
+                    times.get(name)[2], times.get(name)[3]
             });
         } else {
             times.put(name, new double[]{times.get(name)[0],
                     times.get(name)[1],
-                    Double.max(times.get(name)[2], scoreCounter)
+                    Double.max(times.get(name)[2], scoreCounter),
+                    Double.min(times.get(name)[3], scoreCounter)
             });
         }
         writeTimesToFile();
@@ -216,7 +217,9 @@ public class MainApp extends Application {
                 times.put(line.split(",")[0],
                         new double[]{Double.parseDouble(line.split(",")[1]),
                                 Double.parseDouble(line.split(",")[2]),
-                                Double.parseDouble(line.split(",")[3])});
+                                Double.parseDouble(line.split(",")[3]),
+                                Double.parseDouble(line.split(",")[4])
+                });
                 line = reader.readLine();
             }
             reader.close();
