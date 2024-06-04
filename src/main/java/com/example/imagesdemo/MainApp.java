@@ -228,7 +228,7 @@ public class MainApp extends Application {
         }
 
         if (!times.containsKey(name)) {
-            times.put(name, new double[]{0, 1000, 0});
+            times.put(name, new double[]{0, 1000, 0, 1000});
         }
 
         if (timer == null) {
