@@ -2,10 +2,13 @@ package com.example.imagesdemo;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
@@ -158,6 +161,24 @@ public class MainApp extends Application {
      * Sets up the scene, balls, and event handlers for the scene. Also provided the user a button to run the game
      */
     private static void initialiseApplication() {
+        BufferedReader reader;
+        try {
+            reader = new BufferedReader(new FileReader("Times.txt"));
+            String line = reader.readLine();
+            while (line != null) {
+                times.put(line.split(",")[0],
+                        new double[]{Double.parseDouble(line.split(",")[1]),
+                                Double.parseDouble(line.split(",")[2]),
+                                Double.parseDouble(line.split(",")[3]),
+                                Double.parseDouble(line.split(",")[4])
+                        });
+                line = reader.readLine();
+            }
+            reader.close();
+        } catch(IOException e) {
+            System.out.println("Failed to read the times.");
+        }
+
         scene.setFill(Paint.valueOf("#000000"));
         timerCounter = 0;
         scoreCounter = 0;
@@ -169,24 +190,64 @@ public class MainApp extends Application {
         BALLS.add(player);
 
         TextField tf = new TextField();
-        tf.setTranslateX(400);
-        tf.setTranslateY(150);
+        tf.setTranslateX(600);
+        tf.setTranslateY(300);
 
         ROOT.getChildren().add(tf);
 
+        TextField[] textFields = new TextField[8];
+        for (int i = 0; i < textFields.length; i++) {
+            textFields[i] = new TextField();
+            textFields[i].setTranslateX(700);
+            textFields[i].setTranslateY(50+50*i + ((i%4==i)?0:200));
+            ROOT.getChildren().add(textFields[i]);
+        }
+        textFields[0].setText(getBestTime());
+        textFields[1].setText(getLeastTime());
+        textFields[2].setText(getBestScore());
+        textFields[3].setText(getLeastScore());
+        ObservableList<String> options = FXCollections.observableArrayList(times.keySet());
+        options.add("New Guy");
+        ComboBox<String> getScores = new ComboBox<>(options);
+        getScores.setTranslateX(600);
+        getScores.setTranslateY(400);
+        getScores.setOnAction(e -> {
+            if (getScores.getValue().equals("New Guy")) {
+                textFields[4].setText("");
+                textFields[5].setText("");
+                textFields[6].setText("");
+                textFields[7].setText("");
+                return;
+            }
+            textFields[4].setText(String.valueOf(times.get(getScores.getValue())[0]));
+            textFields[5].setText(String.valueOf(times.get(getScores.getValue())[1]));
+            textFields[6].setText(String.valueOf(times.get(getScores.getValue())[2]));
+            textFields[7].setText(String.valueOf(times.get(getScores.getValue())[3]));
+        });
+
+        ROOT.getChildren().add(getScores);
+
         Button timeAttackButton = genButton("Run Time Attack", Paint.valueOf("#00ff00"),
-                Paint.valueOf("#ff00ff"), 350, 300);
+                Paint.valueOf("#ff00ff"), 150, 200);
         Button scoreAttackButton = genButton("Run Score Attack", Paint.valueOf("#ffffff"),
-                Paint.valueOf("#555555"), 350, 500);
+                Paint.valueOf("#555555"), 150, 400);
         timeAttackButton.setOnAction(e -> {
             isTimeAttack = true;
-            ROOT.getChildren().removeAll(tf, timeAttackButton, scoreAttackButton);
-            run(tf.getText());
+            String s = (getScores.getValue().equals("New Guy"))?tf.getText():getScores.getValue();
+            ROOT.getChildren().removeAll(tf, timeAttackButton, scoreAttackButton, getScores);
+            for (TextField textField : textFields) {
+                ROOT.getChildren().remove(textField);
+            }
+            run(s);
         });
         scoreAttackButton.setOnAction(e -> {
             isTimeAttack = false;
-            ROOT.getChildren().removeAll(tf, timeAttackButton, scoreAttackButton);
-            run(tf.getText());
+            String s = (getScores.getValue().equals("New Guy"))?tf.getText():getScores.getValue();
+            ROOT.getChildren().removeAll(tf, timeAttackButton, scoreAttackButton, getScores);
+            for (TextField textField : textFields) {
+                ROOT.getChildren().remove(textField);
+            }
+            run(s);
         });
 
         EventHandler<KeyEvent> keyPressedEventHandler = MainApp::move;
@@ -202,30 +263,60 @@ public class MainApp extends Application {
 
     }
 
+    private static String getBestTime() {
+        String[] bestTimeString = {""};
+        double[] bestTime = {0};
+        times.forEach((s,d) -> {
+            if (d[0] > bestTime[0]) {
+                bestTime[0] = d[0];
+                bestTimeString[0] = s+" : "+bestTime[0];
+            }
+        });
+        return bestTimeString[0];
+    }
+
+    private static String getLeastTime() {
+        String[] leastTimeString = {""};
+        double[] leastTime = {1000};
+        times.forEach((s,d) -> {
+            if (d[1] < leastTime[0]) {
+                leastTime[0] = d[1];
+                leastTimeString[0] = s+" : "+leastTime[0];
+            }
+        });
+        return leastTimeString[0];
+    }
+
+    private static String getBestScore() {
+        String[] bestScoreString = {""};
+        double[] bestScore = {0};
+        times.forEach((s,d) -> {
+            if (d[2] > bestScore[0]) {
+                bestScore[0] = d[2];
+                bestScoreString[0] = s+" : "+bestScore[0];
+            }
+        });
+        return bestScoreString[0];
+    }
+
+    private static String getLeastScore() {
+        String[] leastScoreString = {""};
+        double[] leastScore = {1000};
+        times.forEach((s,d) -> {
+            if (d[3] < leastScore[0]) {
+                leastScore[0] = d[3];
+                leastScoreString[0] = s+" : "+leastScore[0];
+            }
+        });
+        return leastScoreString[0];
+    }
+
     /**
      * Handles the logic for starting the game. Initialises a timer and a label to keep track of the time
      * elapsed.
      */
     private static void run(String name) {
         MainApp.name = name;
-
-        BufferedReader reader;
-        try {
-            reader = new BufferedReader(new FileReader("Times.txt"));
-            String line = reader.readLine();
-            while (line != null) {
-                times.put(line.split(",")[0],
-                        new double[]{Double.parseDouble(line.split(",")[1]),
-                                Double.parseDouble(line.split(",")[2]),
-                                Double.parseDouble(line.split(",")[3]),
-                                Double.parseDouble(line.split(",")[4])
-                });
-                line = reader.readLine();
-            }
-            reader.close();
-        } catch(IOException e) {
-            System.out.println("Failed to read the times.");
-        }
 
         if (!times.containsKey(name)) {
             times.put(name, new double[]{0, 1000, 0, 1000});
