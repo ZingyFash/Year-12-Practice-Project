@@ -4,12 +4,14 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Player extends Ball {
 
     private final HashMap<KeyCode, Boolean> keyCodeHashMap;
-    private final Circle core;
+    private final ArrayList<Circle> core = new ArrayList<>();
+    private final Circle innerGfx;
 
     public static void main(String[] args) {
         MainApp.main(args);
@@ -24,8 +26,12 @@ public class Player extends Ball {
         this.pos = Vector2.vec2(500, 500);
         this.vel = Vector2.vec2(0, 0);
         this.gfx = new Circle(this.pos.x, this.pos.y, 25, Paint.valueOf("#ff0000"));
-        this.core = new Circle(this.pos.x, this.pos.y, 15, Paint.valueOf("#ffffff"));
-        MainApp.ROOT.getChildren().addAll(this.gfx, this.core);
+        this.core.add(new Circle(this.pos.x, this.pos.y, 20, Paint.valueOf("#00ff00")));
+        this.core.add(new Circle(this.pos.x, this.pos.y, 15, Paint.valueOf("#0000ff")));
+        this.core.add(new Circle(this.pos.x, this.pos.y, 10, Paint.valueOf("#000000")));
+        this.innerGfx = new Circle(this.pos.x, this.pos.y, 5, Paint.valueOf("#ffffff"));
+        MainApp.ROOT.getChildren().addAll(this.gfx);
+        core.forEach(c -> MainApp.ROOT.getChildren().add(c));
         keyCodeHashMap = new HashMap<>();
         keyCodeHashMap.put(KeyCode.W, false);
         keyCodeHashMap.put(KeyCode.A, false);
@@ -44,7 +50,7 @@ public class Player extends Ball {
      * @param code - The key code indicating which key whose status is being updated
      * @param bool - Indicates whether the key has been pressed (true) or released (false)
      */
-    public void updateKeyCodeHashMap(KeyCode code, Boolean bool) {
+    public void updateKeysPressed(KeyCode code, Boolean bool) {
         keyCodeHashMap.replace(code, bool);
     }
 
@@ -57,8 +63,10 @@ public class Player extends Ball {
         resolveBorderCollisions();
         gfx.setCenterX(pos.x);
         gfx.setCenterY(pos.y);
-        core.setCenterX(pos.x);
-        core.setCenterY(pos.y);
+        innerGfx.setCenterX(pos.x);
+        innerGfx.setCenterY(pos.y);
+        core.forEach(c->c.setCenterX(pos.x));
+        core.forEach(c->c.setCenterY(pos.y));
     }
 
     /**
@@ -81,6 +89,17 @@ public class Player extends Ball {
         if (keyCodeHashMap.get(KeyCode.D) || keyCodeHashMap.get(KeyCode.RIGHT)) vel.x = 3;
         if (!(keyCodeHashMap.get(KeyCode.W) || keyCodeHashMap.get(KeyCode.UP)) && !(keyCodeHashMap.get(KeyCode.S) || keyCodeHashMap.get(KeyCode.DOWN))) vel.y = 0;
         if (!(keyCodeHashMap.get(KeyCode.A) || keyCodeHashMap.get(KeyCode.LEFT)) && !(keyCodeHashMap.get(KeyCode.D)|| keyCodeHashMap.get(KeyCode.RIGHT))) vel.x = 0;
+    }
+
+    @Override
+    public void updateVisuals(boolean isDefaultMode) {
+        if (isDefaultMode) {
+            core.forEach(c -> MainApp.ROOT.getChildren().remove(c));
+            MainApp.ROOT.getChildren().add(innerGfx);
+        } else {
+            core.forEach(c -> MainApp.ROOT.getChildren().add(c));
+            MainApp.ROOT.getChildren().remove(innerGfx);
+        }
     }
 }
 

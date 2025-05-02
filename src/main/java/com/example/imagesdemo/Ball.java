@@ -9,8 +9,10 @@ import java.util.Random;
 public class Ball {
     Vector2 pos;
     Vector2 vel;
+    public Circle outline;
     public Circle gfx;
     public final ArrayList<Ball> inContactBalls = new ArrayList<>();
+
 
     public static void main(String[] args) {
         MainApp.main(args);
@@ -29,8 +31,10 @@ public class Ball {
         for (int i = 0; i < 6 - length; i++) {
             colourString.insert(0, "0");
         }
-        gfx = new Circle(0, 0, 20, Paint.valueOf("#"+ colourString));
-        MainApp.ROOT.getChildren().add(gfx);
+        outline = new Circle(0,0,20, Paint.valueOf("#"+colourString));
+        colourString = new StringBuilder("000000");
+        gfx = new Circle(0, 0, 15, Paint.valueOf("#"+ colourString));
+        MainApp.ROOT.getChildren().addAll(outline,gfx);
 
 
         int wall = random.nextInt(4);
@@ -42,6 +46,9 @@ public class Ball {
         pos = Vector2.vec2(x, y);
         vel = Vector2.vec2(3*(random.nextDouble()-.5), 3*(random.nextDouble()-.5));
 
+        outline.setCenterX(pos.x);
+        outline.setCenterY(pos.y);
+
         gfx.setCenterX(pos.x);
         gfx.setCenterY(pos.y);
     }
@@ -52,13 +59,15 @@ public class Ball {
     public void update() {
         resolveBorderCollisions();
         resolveBallCollisions(false);
-        curveToPlayer();
+        curveVelocityToPlayer();
         pos = Vector2.add(pos, vel);
+        outline.setCenterX(pos.x);
+        outline.setCenterY(pos.y);
         gfx.setCenterX(pos.x);
         gfx.setCenterY(pos.y);
     }
 
-    private void curveToPlayer() {
+    private void curveVelocityToPlayer() {
         Vector2 displacement = Vector2.sub(MainApp.BALLS.getLast().pos, pos);
         double distance = displacement.getMagnitude();
         displacement = displacement.normalise();
@@ -87,6 +96,7 @@ public class Ball {
             u1.x = u2.x;
             vel = u1.rotate(-a);
 
+        
             if (!testing) b.resolveBallCollisions(true);
         });
     }
@@ -100,5 +110,13 @@ public class Ball {
 
     Vector2 getVel() {
         return vel;
+    }
+
+    public void updateVisuals(boolean isDefaultMode) {
+        if (isDefaultMode) {
+            MainApp.ROOT.getChildren().remove(gfx);
+        } else {
+            MainApp.ROOT.getChildren().add(gfx);
+        }
     }
 }

@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.paint.Paint;
@@ -29,6 +30,8 @@ public class MainApp extends Application {
     public static final ArrayList<Ball> BALLS = new ArrayList<>();
     public static final int SCENE_WIDTH = 1000;
     public static final int SCENE_HEIGHT = 750;
+    private static String name;
+    private static final HashMap<String, double[]> times = new HashMap<>();
 
     private static double timerCounter = 0;
     private static double scoreCounter = 0;
@@ -40,7 +43,9 @@ public class MainApp extends Application {
     static HashMap<Ball, Vector2> ballVelHash = new HashMap<>();
     private static boolean isRunning = true;
     private static boolean isTimeAttack = true;
+    private static boolean isDefaultMode = false;
     private static final double scoreAttackMultiplier = 0.00025;
+
 
     /**
      * Handles the logic for ending the game. This includes updating the player's
@@ -105,7 +110,7 @@ public class MainApp extends Application {
         restartButton.setOnAction(e -> {
             ROOT.getChildren().clear();
             BALLS.clear();
-
+            isDefaultMode = false;
             timerCounter = 0;
             scoreCounter = 0;
 
@@ -231,27 +236,33 @@ public class MainApp extends Application {
                 Paint.valueOf("#ff00ff"), 150, 200);
         Button scoreAttackButton = genButton("Run Score Attack", Paint.valueOf("#ffffff"),
                 Paint.valueOf("#555555"), 150, 400);
+        Button swichModeButton = genButton("Switch Visual Mode", Paint.valueOf("#000000"),
+                Paint.valueOf("#ffffff"), 150, 600);
         timeAttackButton.setOnAction(e -> {
             isTimeAttack = true;
             String s = (getScores.getValue().equals("New Guy"))?tf.getText():getScores.getValue();
-            ROOT.getChildren().removeAll(tf, timeAttackButton, scoreAttackButton, getScores);
+            ROOT.getChildren().removeAll(tf, timeAttackButton, scoreAttackButton, getScores, swichModeButton);
             for (TextField textField : textFields) {
                 ROOT.getChildren().remove(textField);
             }
-            run(s);
+            startGame(s);
         });
         scoreAttackButton.setOnAction(e -> {
             isTimeAttack = false;
             String s = (getScores.getValue().equals("New Guy"))?tf.getText():getScores.getValue();
-            ROOT.getChildren().removeAll(tf, timeAttackButton, scoreAttackButton, getScores);
+            ROOT.getChildren().removeAll(tf, timeAttackButton, scoreAttackButton, getScores, swichModeButton);
             for (TextField textField : textFields) {
                 ROOT.getChildren().remove(textField);
             }
-            run(s);
+            startGame(s);
+        });
+        swichModeButton.setOnAction(e -> {
+            isDefaultMode = !isDefaultMode;
+            BALLS.forEach(b -> b.updateVisuals(isDefaultMode));
         });
 
-        EventHandler<KeyEvent> keyPressedEventHandler = MainApp::move;
-        EventHandler<KeyEvent> keyReleasedEventHandler = MainApp::stopMove;
+        EventHandler<KeyEvent> keyPressedEventHandler = MainApp::handleKeyPressed;
+        EventHandler<KeyEvent> keyReleasedEventHandler = MainApp::handleKeyReleased;
         scene.addEventHandler(KeyEvent.KEY_PRESSED, keyPressedEventHandler);
         scene.addEventHandler(KeyEvent.KEY_RELEASED, keyReleasedEventHandler);
 
@@ -315,7 +326,7 @@ public class MainApp extends Application {
      * Handles the logic for starting the game. Initialises a timer and a label to keep track of the time
      * elapsed.
      */
-    private static void run(String name) {
+    private static void startGame(String name) {
         MainApp.name = name;
 
         if (!times.containsKey(name)) {
@@ -336,6 +347,7 @@ public class MainApp extends Application {
             timerLabel.setBackground(Background.fill(Paint.valueOf("#ffffff")));
             timerLabel.setTextFill(Paint.valueOf("#ff0000"));
             timerLabel.setFont(Font.font(50));
+            timerLabel.toBack();
         }
         timerLabel.setTranslateX(0);
         timerLabel.setTranslateY(0);
@@ -353,12 +365,16 @@ public class MainApp extends Application {
 
     }
 
-    private static void move(KeyEvent keyEvent) {
-        player.updateKeyCodeHashMap(keyEvent.getCode(), true);
+    private static void handleKeyPressed(KeyEvent keyEvent) {
+        if (keyEvent.getCode() == KeyCode.TAB) {
+            isDefaultMode = !isDefaultMode;
+            BALLS.forEach(b -> b.updateVisuals(isDefaultMode));
+        }
+        player.updateKeysPressed(keyEvent.getCode(), true);
     }
 
-    private static void stopMove(KeyEvent keyEvent) {
-        player.updateKeyCodeHashMap(keyEvent.getCode(), false);
+    private static void handleKeyReleased(KeyEvent keyEvent) {
+        player.updateKeysPressed(keyEvent.getCode(), false);
     }
 
     /**
@@ -393,11 +409,7 @@ public class MainApp extends Application {
         return total[0];
     }
 
-    private static String name;
-    private static final HashMap<String, double[]> times = new HashMap<>();
-
     /**
-     * For now handles the identification of the user then runs the JavaFX application.
      * @param args - command line arguments or something I don't know it just complained
      *            that there was nothing here.
      */
